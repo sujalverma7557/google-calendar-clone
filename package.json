@@ -1,0 +1,15 @@
+{
+  "name": "google-calendar-clone",
+  "version": "1.0.0",
+  "description": "A high-fidelity fullstack clone of Google Calendar",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "setup:db": "cd backend && npx prisma generate && npx prisma migrate dev"
+  },
+  "keywords": ["calendar", "events", "fullstack", "react", "nodejs"],
+  "author": "",
+  "license": "ISC"
+}

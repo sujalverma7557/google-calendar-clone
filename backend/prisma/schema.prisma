@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  color       String    @default("#1a73e8")
+  location    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Recurring event relationships
+  recurringPattern RecurringPattern?
+  exceptions       EventException[]
+
+  @@index([startTime, endTime])
+}
+
+model RecurringPattern {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  frequency   String   // DAILY, WEEKLY, MONTHLY
+  interval    Int      @default(1) // Every N days/weeks/months
+  endDate     DateTime? // Optional end date for recurring series
+  daysOfWeek  String?  // For weekly: comma-separated days (e.g., "MON,WED,FRI")
+  monthDay    Int?     // For monthly: day of month (1-31)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EventException {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  originalDate DateTime // The date in the recurring series that this replaces
+  newTitle    String?
+  newStartTime DateTime?
+  newEndTime  DateTime?
+  isDeleted   Boolean  @default(false) // If true, this occurrence is deleted
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId, originalDate])
+}
+
