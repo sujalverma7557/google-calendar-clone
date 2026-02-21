@@ -1,0 +1,40 @@
+databases:
+  - name: calendar-db
+    plan: free
+    databaseName: calendar_db
+    user: calendar_user
+
+services:
+  - type: web
+    name: calendar-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calendar-db
+          property: connectionString
+      - key: PORT
+        value: 3001
+      - key: FRONTEND_URL
+        sync: false
+
+  - type: static
+    name: calendar-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false
